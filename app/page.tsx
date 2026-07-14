@@ -2,9 +2,27 @@
 
 import { useState } from "react";
 
+type PastLifeRecord = {
+  no: number;
+  being: string;
+  era: string;
+  death: string;
+  achievement: string;
+  memory: string;
+};
+
+const FIELDS: { key: keyof PastLifeRecord; icon: string; label: string }[] = [
+  { key: "being", icon: "🧬", label: "전생의 직업 또는 존재" },
+  { key: "era", icon: "🕰️", label: "시대" },
+  { key: "death", icon: "🕯️", label: "사인(죽은 이유)" },
+  { key: "achievement", icon: "🏆", label: "전생의 업적" },
+  { key: "memory", icon: "📜", label: "사람들은 전생의 나를 어떻게 기억하고 있는지" },
+];
+
 export default function Home() {
   const [name, setName] = useState("");
-  const [result, setResult] = useState("");
+  const [resultName, setResultName] = useState("");
+  const [record, setRecord] = useState<PastLifeRecord | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -14,7 +32,7 @@ export default function Home() {
     if (!trimmed || loading) return;
 
     setLoading(true);
-    setResult("");
+    setRecord(null);
     setError("");
 
     try {
@@ -27,7 +45,8 @@ export default function Home() {
       if (!res.ok) {
         throw new Error(data.error ?? "알 수 없는 오류가 발생했습니다.");
       }
-      setResult(data.story);
+      setResultName(data.name);
+      setRecord(data.record);
     } catch (err) {
       setError(err instanceof Error ? err.message : "요청에 실패했습니다.");
     } finally {
@@ -40,7 +59,8 @@ export default function Home() {
       <div className="card">
         <h1>🔮 전생 알아보기</h1>
         <p className="subtitle">
-          이름을 입력하면 AI가 그 사람의 전생 이야기를 들려드려요.
+          이름을 입력하면 기원전 150만년부터 1980년까지, 150가지 전생 기록
+          속에서 당신의 전생을 찾아드려요.
         </p>
         <form className="name-form" onSubmit={handleSubmit}>
           <input
@@ -65,10 +85,20 @@ export default function Home() {
         </div>
       )}
 
-      {result && (
+      {record && (
         <div className="result">
-          <h2>✨ {name.trim()} 님의 전생</h2>
-          <p>{result}</p>
+          <h2>✨ {resultName} 님의 전생 기록</h2>
+          <p className="record-no">전생 기록 제{record.no}호</p>
+          <dl className="record">
+            {FIELDS.map(({ key, icon, label }) => (
+              <div className="record-row" key={key}>
+                <dt>
+                  {icon} {label}
+                </dt>
+                <dd>{String(record[key])}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       )}
     </main>

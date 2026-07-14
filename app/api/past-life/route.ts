@@ -1,9 +1,50 @@
 import { NextResponse } from "next/server";
+import fs from "node:fs";
+import path from "node:path";
+import * as XLSX from "xlsx";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
 
-const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+export type PastLifeRecord = {
+  no: number;
+  being: string;
+  era: string;
+  death: string;
+  achievement: string;
+  memory: string;
+};
+
+let cache: PastLifeRecord[] | null = null;
+
+function loadRecords(): PastLifeRecord[] {
+  if (cache) return cache;
+
+  const filePath = path.join(process.cwd(), "data", "past-lives.xlsx");
+  const workbook = XLSX.read(fs.readFileSync(filePath));
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+
+  cache = rows.map((row) => ({
+    no: Number(row["번호"]),
+    being: String(row["전생의 직업 또는 존재"] ?? ""),
+    era: String(row["시대"] ?? ""),
+    death: String(row["사인(죽은 이유)"] ?? ""),
+    achievement: String(row["전생의 업적"] ?? ""),
+    memory: String(row["사람들은 전생의 나를 어떻게 기억하고 있는지"] ?? ""),
+  }));
+
+  return cache;
+}
+
+// FNV-1a — 같은 이름은 항상 같은 전생으로 매핑된다.
+function hashName(name: string): number {
+  let h = 0x811c9dc5;
+  for (const ch of name) {
+    h ^= ch.codePointAt(0)!;
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
 
 export async function POST(req: Request) {
   let name: unknown;
@@ -20,62 +61,26 @@ export async function POST(req: Request) {
     );
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  let records: PastLifeRecord[];
+  try {
+    records = loadRecords();
+  } catch (err) {
+    console.error("전생 기록 파일 로드 실패:", err);
     return NextResponse.json(
-      { error: "서버에 OPENAI_API_KEY가 설정되지 않았습니다." },
+      { error: "전생 기록 데이터를 불러오지 못했습니다." },
       { status: 500 },
     );
   }
 
-  const model = process.env.OPENAI_MODEL ?? "gpt-5.5";
-
-  const res = await fetch(OPENAI_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "당신은 재치 있는 전생 이야기꾼입니다. 사용자가 이름을 알려주면 " +
-            "그 사람의 전생을 상상해서 들려줍니다. 시대와 장소, 직업, 성격, " +
-            "결정적 사건, 그리고 현생과 이어지는 재미있는 인연 한 가지를 담아 " +
-            "한국어로 4~6문단의 흥미진진한 이야기를 써주세요. 유머와 반전을 " +
-            "곁들이되, 이름의 느낌을 이야기에 자연스럽게 녹여주세요. " +
-            "이것은 오락용 창작 이야기임을 전제로 합니다.",
-        },
-        {
-          role: "user",
-          content: `"${name.trim()}"의 전생 이야기를 들려주세요.`,
-        },
-      ],
-      max_completion_tokens: 1500,
-    }),
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    console.error("OpenAI API error:", res.status, detail);
+  if (records.length === 0) {
     return NextResponse.json(
-      { error: `전생 이야기 생성에 실패했습니다. (OpenAI ${res.status})` },
-      { status: 502 },
+      { error: "전생 기록 데이터가 비어 있습니다." },
+      { status: 500 },
     );
   }
 
-  const data = await res.json();
-  const story: string | undefined = data.choices?.[0]?.message?.content;
+  const normalized = name.trim().normalize("NFC");
+  const record = records[hashName(normalized) % records.length];
 
-  if (!story) {
-    return NextResponse.json(
-      { error: "AI가 빈 응답을 반환했습니다. 다시 시도해주세요." },
-      { status: 502 },
-    );
-  }
-
-  return NextResponse.json({ story });
+  return NextResponse.json({ name: normalized, record });
 }

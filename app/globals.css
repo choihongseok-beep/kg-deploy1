@@ -124,6 +124,36 @@ form.name-form button:disabled {
   color: var(--accent);
 }
 
+.record-no {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-bottom: 20px;
+}
+
+dl.record {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.record-row {
+  border-left: 3px solid var(--accent);
+  padding-left: 14px;
+}
+
+.record-row dt {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.record-row dd {
+  margin: 0;
+  line-height: 1.65;
+}
+
 .error {
   color: #c0392b;
   font-weight: 600;
