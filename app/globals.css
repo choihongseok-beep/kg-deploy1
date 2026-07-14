@@ -1,0 +1,146 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-from: #2b1055;
+  --bg-to: #7597de;
+  --card-bg: rgba(255, 255, 255, 0.92);
+  --accent: #6c3ce9;
+  --accent-hover: #5b2fd1;
+  --text: #1f1633;
+  --text-sub: #6b6480;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    "Segoe UI",
+    sans-serif;
+  background: linear-gradient(160deg, var(--bg-from), var(--bg-to));
+  color: var(--text);
+}
+
+main.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 40px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.card h1 {
+  font-size: 1.9rem;
+  margin-bottom: 8px;
+}
+
+.card p.subtitle {
+  color: var(--text-sub);
+  margin-bottom: 28px;
+  font-size: 0.95rem;
+}
+
+form.name-form {
+  display: flex;
+  gap: 10px;
+}
+
+form.name-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 2px solid #ddd4f5;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+form.name-form input:focus {
+  border-color: var(--accent);
+}
+
+form.name-form button {
+  padding: 14px 22px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+form.name-form button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+form.name-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.result {
+  width: 100%;
+  max-width: 560px;
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  white-space: pre-wrap;
+  line-height: 1.75;
+  font-size: 1rem;
+}
+
+.result h2 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+
+.error {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.loading {
+  color: #fff;
+  font-size: 0.95rem;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
