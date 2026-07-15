@@ -235,7 +235,6 @@ main.container {
 
 .story {
   margin-top: 8px;
-  white-space: pre-wrap;
   line-height: 1.9;
   color: var(--text);
   background: var(--bg);
@@ -243,6 +242,10 @@ main.container {
   border-left: 3px solid var(--green);
   border-radius: 6px;
   padding: 16px 18px;
+}
+
+.story p + p {
+  margin-top: 1em;
 }
 
 .notice {

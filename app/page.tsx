@@ -145,7 +145,15 @@ export default function Home() {
               {result.story ? (
                 <div className="story-block">
                   <p className="comment">{"/** ===== 전생 이야기 ===== */"}</p>
-                  <p className="story">{result.story}</p>
+                  <div className="story">
+                    {result.story
+                      .split(/\n+/)
+                      .map((para) => para.trim())
+                      .filter(Boolean)
+                      .map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                  </div>
                 </div>
               ) : (
                 <p className="notice">
